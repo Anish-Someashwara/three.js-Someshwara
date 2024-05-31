@@ -28,7 +28,7 @@
 			import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 			let camera, scene, renderer, startTime, object, stats;
-            let raycaster, mouse;
+			let raycaster, mouse;
 
 			init();
 			animate();
@@ -46,10 +46,9 @@
 
 				scene = new THREE.Scene();
 
-
 				// Lights
 				scene.add(new THREE.AmbientLight(0xcccccc));
-				
+
 				const spotLight = new THREE.SpotLight(0xffffff, 60);
 				spotLight.angle = Math.PI / 5;
 				spotLight.penumbra = 0.2;
@@ -76,14 +75,21 @@
 				dirLight.shadow.mapSize.height = 1024;
 				scene.add(dirLight);
 
-
-				// ***** Clipping planes: *****
-				const localPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0.8);
-				const globalPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0.1);
-
-				const localPlaneHelper = new THREE.PlaneHelper(localPlane, 1, 0xffffff);
+				// ***** Local Clipping plane: *****
+				// const localPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0.8);
+				// const localPlaneHelper = new THREE.PlaneHelper(localPlane, 1, 0xffffff);
 				// scene.add(localPlaneHelper);
 
+				// ***** Global Clipping plane: *****
+				const globalPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 4);
+				const globalPlaneHelper = new THREE.PlaneHelper(
+					globalPlane,
+					10,
+					0x07cee8
+				);
+				scene.add(globalPlaneHelper);
+
+				// Clipping Box Creation Starts Here
 				/////////////////////////////////////////////////////////////////////////////////////////////////////
 				// Plane size for visualization purposes
 				const planeSize = 1;
@@ -96,31 +102,49 @@
 
 				// Normal vectors and constants for the cube planes
 				const planeDefinitions = [
-					{normal: new THREE.Vector3(1, 0, 0),    constant: planeSize / 2 + xOffset,}, // Left face
-					{normal: new THREE.Vector3(-1, 0, 0),   constant: planeSize / 2 - xOffset,}, // Right face
-					{normal: new THREE.Vector3(0, 1, 0),    constant: planeSize / 2 + yOffset,}, // Bottom face
-					{normal: new THREE.Vector3(0, -1, 0),   constant: planeSize / 2 - yOffset,}, // Top face
-					{normal: new THREE.Vector3(0, 0, 1),    constant: planeSize / 2 + zOffset,}, // Back face
-					{normal: new THREE.Vector3(0, 0, -1),   constant: planeSize / 2 - zOffset,}, // Front face
+					{
+						normal: new THREE.Vector3(1, 0, 0),
+						constant: planeSize / 2 + xOffset,
+					}, // Left face
+					{
+						normal: new THREE.Vector3(-1, 0, 0),
+						constant: planeSize / 2 - xOffset,
+					}, // Right face
+					{
+						normal: new THREE.Vector3(0, 1, 0),
+						constant: planeSize / 2 + yOffset,
+					}, // Bottom face
+					{
+						normal: new THREE.Vector3(0, -1, 0),
+						constant: planeSize / 2 - yOffset,
+					}, // Top face
+					{
+						normal: new THREE.Vector3(0, 0, 1),
+						constant: planeSize / 2 + zOffset,
+					}, // Back face
+					{
+						normal: new THREE.Vector3(0, 0, -1),
+						constant: planeSize / 2 - zOffset,
+					}, // Front face
 				];
 
 				// Create planes and add helpers to the scene
-                const helpers = new THREE.Group();
+				const helpers = new THREE.Group();
 
 				planeDefinitions.forEach((def, index) => {
 					const plane = new THREE.Plane(def.normal, def.constant);
-					const planeHelper = new THREE.PlaneHelper(plane,planeSize,0xff0000);
-                    helpers.add(planeHelper);
+					const planeHelper = new THREE.PlaneHelper(plane, planeSize, 0xff0000);
+					helpers.add(planeHelper);
 					planes.push(plane);
 				});
 
+				helpers.add(globalPlaneHelper);
 
-				helpers.visible = false;
-				scene.add( helpers );
+				helpers.visible = true;
+				scene.add(helpers);
 				/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 				// Geometry
-
 				const material = new THREE.MeshPhongMaterial({
 					color: 0x80ee10,
 					shininess: 100,
@@ -129,7 +153,7 @@
 					// ***** Clipping setup (material): *****
 					// clippingPlanes: [localPlane],
 					clippingPlanes: planes,
-                    clipIntersection: false,
+					clipIntersection: false,
 					clipShadows: true,
 
 					alphaToCoverage: true,
@@ -144,17 +168,68 @@
 				// console.log(object.position);
 				// object.position.set(-1, 0, 0);
 
-				const axesHelper = new THREE.AxesHelper( 5 );
-				scene.add( axesHelper );
+				const axesHelper = new THREE.AxesHelper(5);
+				// scene.add( axesHelper );
 
+				// Additional Shapes
+				const cubeMaterial = new THREE.MeshPhongMaterial({
+					color: 0x0088ff,
+					shininess: 100,
+					side: THREE.DoubleSide,
+					// clippingPlanes: planes,
+					// clipIntersection: false,
+					// clipShadows: true,
+					alphaToCoverage: true,
+				});
+
+				const cubeGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+				const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+				cube.position.set(1, 0, -2.5);
+				cube.castShadow = true;
+				scene.add(cube);
+
+				const sphereMaterial = new THREE.MeshPhongMaterial({
+					color: 0xff8800,
+					shininess: 100,
+					side: THREE.DoubleSide,
+					// clippingPlanes: planes,
+					// clipIntersection: false,
+					// clipShadows: true,
+					alphaToCoverage: true,
+				});
+
+				const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+				const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+				sphere.position.set(-1, 0, 2);
+				sphere.castShadow = true;
+				scene.add(sphere);
+
+				const coneMaterial = new THREE.MeshPhongMaterial({
+					color: 0x7b07e8,
+					shininess: 100,
+					side: THREE.DoubleSide,
+					// clippingPlanes: planes,
+					// clipIntersection: false,
+					// clipShadows: true,
+					alphaToCoverage: true,
+				});
+
+				const coneGeometry = new THREE.ConeGeometry(0.8, 2, 32);
+				const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+				cone.position.set(-3, 0, -3);
+				cone.castShadow = true;
+				scene.add(cone);
+
+				// Ground
 				const ground = new THREE.Mesh(
 					new THREE.PlaneGeometry(9, 9, 1, 1),
 					new THREE.MeshPhongMaterial({ color: 0xa0adaf, shininess: 150 })
 				);
 
 				ground.rotation.x = -Math.PI / 2; // rotates X/Y to X/Z
+				ground.position.y = -0.6;
 				ground.receiveShadow = true;
-				// scene.add(ground);
+				scene.add(ground);
 
 				// Stats
 
@@ -171,22 +246,21 @@
 				document.body.appendChild(renderer.domElement);
 
 				// ***** Clipping setup (renderer): *****
-				const globalPlanes = [globalPlane], Empty = Object.freeze([]);
+				const globalPlanes = [globalPlane],
+					Empty = Object.freeze([]);
 				renderer.clippingPlanes = Empty; // GUI sets it to globalPlanes
 				renderer.localClippingEnabled = true;
-
 
 				// Controls
 				const controls = new OrbitControls(camera, renderer.domElement);
 				controls.target.set(0, 0, 0);
 				controls.update();
 
-
 				// GUI
 				const gui = new GUI(),
 					props = {
 						alphaToCoverage: true,
-                        showHelpers: false,
+						showHelpers: true,
 					},
 					folderLocal = gui.addFolder("Local Clipping"),
 					propsLocal = {
@@ -196,7 +270,6 @@
 						set Enabled(v) {
 							renderer.localClippingEnabled = v;
 						},
-
 						get Shadows() {
 							return material.clipShadows;
 						},
@@ -204,7 +277,7 @@
 							material.clipShadows = v;
 						},
 
-                        // Cube Planes setter and getter
+						// Cube Planes setter and getter
 						get Plane1() {
 							return planes[0].constant;
 						},
@@ -212,86 +285,86 @@
 							planes[0].constant = v;
 						},
 
-                        get Plane2() {
+						get Plane2() {
 							return planes[1].constant;
 						},
 						set Plane2(v) {
 							planes[1].constant = v;
 						},
 
-                        get Plane3() {
+						get Plane3() {
 							return planes[2].constant;
 						},
 						set Plane3(v) {
 							planes[2].constant = v;
 						},
 
-                        get Plane4() {
+						get Plane4() {
 							return planes[3].constant;
 						},
 						set Plane4(v) {
 							planes[3].constant = v;
 						},
 
-                        get Plane5() {
+						get Plane5() {
 							return planes[4].constant;
 						},
 						set Plane5(v) {
 							planes[4].constant = v;
 						},
 
-                        get Plane6() {
+						get Plane6() {
 							return planes[5].constant;
 						},
 						set Plane6(v) {
 							planes[5].constant = v;
 						},
 
-
-                        // TorusKnot Object Position
-                        get GeoX() {
+						// TorusKnot Object Position
+						get GeoX() {
 							return object.position.x;
 						},
 						set GeoX(v) {
 							object.position.x = v;
 						},
 
-                        get GeoY() {
+						get GeoY() {
 							return object.position.y;
 						},
 						set GeoY(v) {
 							object.position.y = v;
 						},
 
-                        get GeoZ() {
+						get GeoZ() {
 							return object.position.z;
 						},
 						set GeoZ(v) {
 							object.position.z = v;
 						},
 					},
+					folderGlobal = gui.addFolder("Global Clipping"),
+					propsGlobal = {
+						get Enabled() {
+							return renderer.clippingPlanes !== Empty;
+						},
+						set Enabled(v) {
+							renderer.clippingPlanes = v ? globalPlanes : Empty;
+						},
 
-                    showHelpersFolder = gui.add( props, 'showHelpers' ).name( 'show helpers' ).onChange( function ( value ) {
-                        helpers.visible = value;
-                        // render();
-                    } );
-                    
-					// folderGlobal = gui.addFolder("Global Clipping"),
-					// propsGlobal = {
-					// 	get Enabled() {
-					// 		return renderer.clippingPlanes !== Empty;
-					// 	},
-					// 	set Enabled(v) {
-					// 		renderer.clippingPlanes = v ? globalPlanes : Empty;
-					// 	},
-
-					// 	get Plane() {
-					// 		return globalPlane.constant;
-					// 	},
-					// 	set Plane(v) {
-					// 		globalPlane.constant = v;
-					// 	},
-					// };
+						get Plane() {
+							return globalPlane.constant;
+						},
+						set Plane(v) {
+							globalPlane.constant = v;
+						},
+					},
+					showHelpersFolder = gui
+						.add(props, "showHelpers")
+						.name("show helpers")
+						.onChange(function (value) {
+							helpers.visible = value;
+							// render();
+						});
 
 				// gui.add(props, "alphaToCoverage").onChange(function (value) {
 				// 	ground.material.alphaToCoverage = value;
@@ -303,7 +376,7 @@
 				// folderLocal.add(propsLocal, "Shadows");
 				folderLocal.add(propsLocal, "Enabled");
 
-                // Cube Planes
+				// Cube Planes
 				folderLocal.add(propsLocal, "Plane1", -3, 3, 0.01);
 				folderLocal.add(propsLocal, "Plane2", -3, 3, 0.01);
 				folderLocal.add(propsLocal, "Plane3", -3, 3, 0.01);
@@ -311,24 +384,22 @@
 				folderLocal.add(propsLocal, "Plane5", -3, 3, 0.01);
 				folderLocal.add(propsLocal, "Plane6", -3, 3, 0.01);
 
-                // TorusKnot Object Positions
+				// TorusKnot Object Positions
 				folderLocal.add(propsLocal, "GeoX", -2, 2, 0.1);
 				folderLocal.add(propsLocal, "GeoY", -2, 2, 0.1);
 				folderLocal.add(propsLocal, "GeoZ", -2, 2, 0.1);
-                
 
-				// folderGlobal.add(propsGlobal, "Enabled");
-				// folderGlobal.add(propsGlobal, "Plane", -0.4, 3);
+				folderGlobal.add(propsGlobal, "Enabled");
+				folderGlobal.add(propsGlobal, "Plane", -5, 5);
 
 				// Start
 				startTime = Date.now();
 
-                // Raycaster
-                raycaster = new THREE.Raycaster();
-                mouse = new THREE.Vector2();
-                window.addEventListener('click', (e) => onClick(e, planes), false);
-			
-            }
+				// Raycaster
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+				window.addEventListener("click", (e) => onClick(e, planes), false);
+			}
 
 			function onWindowResize() {
 				camera.aspect = window.innerWidth / window.innerHeight;
@@ -337,42 +408,41 @@
 				renderer.setSize(window.innerWidth, window.innerHeight);
 			}
 
-            function onClick(event, planes) {
-                // Calculate mouse position in normalized device coordinates
-                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+			function onClick(event, planes) {
+				// Calculate mouse position in normalized device coordinates
+				mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+				mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-                // Update the raycaster with the camera and mouse position
-                raycaster.setFromCamera(mouse, camera);
+				// Update the raycaster with the camera and mouse position
+				raycaster.setFromCamera(mouse, camera);
 
-                // Calculate objects intersecting the ray
-                const intersects = raycaster.intersectObject(object);
+				// Calculate objects intersecting the ray
+				const intersects = raycaster.intersectObject(object);
 
-                if (intersects.length > 0) {
-                    const interObj = intersects[0];
-                    var isClickedInsideClippedVolume = (
-                                    planes[0].distanceToPoint(interObj.point) > 0 &&
-                                    planes[1].distanceToPoint(interObj.point) > 0 &&
-                                    planes[2].distanceToPoint(interObj.point) > 0 &&
-                                    planes[3].distanceToPoint(interObj.point) > 0 &&
-                                    planes[4].distanceToPoint(interObj.point) > 0 &&
-                                    planes[5].distanceToPoint(interObj.point) > 0 
-                                );
-                    // console.log("isClickedInsideClippedVolume: ", 
-                    //                 planes[0].distanceToPoint(interObj.point),
-                    //                 planes[1].distanceToPoint(interObj.point),
-                    //                 planes[2].distanceToPoint(interObj.point),
-                    //                 planes[3].distanceToPoint(interObj.point),
-                    //                 planes[4].distanceToPoint(interObj.point),
-                    //                 planes[5].distanceToPoint(interObj.point),
-                    //             );
+				if (intersects.length > 0) {
+					const interObj = intersects[0];
+					var isClickedInsideClippedVolume =
+						planes[0].distanceToPoint(interObj.point) > 0 &&
+						planes[1].distanceToPoint(interObj.point) > 0 &&
+						planes[2].distanceToPoint(interObj.point) > 0 &&
+						planes[3].distanceToPoint(interObj.point) > 0 &&
+						planes[4].distanceToPoint(interObj.point) > 0 &&
+						planes[5].distanceToPoint(interObj.point) > 0;
+					// console.log("isClickedInsideClippedVolume: ",
+					//                 planes[0].distanceToPoint(interObj.point),
+					//                 planes[1].distanceToPoint(interObj.point),
+					//                 planes[2].distanceToPoint(interObj.point),
+					//                 planes[3].distanceToPoint(interObj.point),
+					//                 planes[4].distanceToPoint(interObj.point),
+					//                 planes[5].distanceToPoint(interObj.point),
+					//             );
 
-                    if(isClickedInsideClippedVolume){
-                        alert("****************** TorusKnot Clicked! ******************");
-                        console.log("****** TorusKnot Clicked! ******");
-                    }
-                }
-            }
+					if (isClickedInsideClippedVolume) {
+						alert("****************** TorusKnot Clicked! ******************");
+						console.log("****** TorusKnot Clicked! ******");
+					}
+				}
+			}
 
 			function animate() {
 				const currentTime = Date.now();
@@ -382,9 +452,9 @@
 
 				// object.position.y = -0.5;
 				// object.position.x = -0.5;
-				// object.rotation.x = time * 0.5;
-				// object.rotation.y = time * 0.2;
-				// object.scale.setScalar(Math.cos(time) * 0.125 + 1);
+				object.rotation.x = time * 0.5;
+				object.rotation.y = time * 0.2;
+				object.scale.setScalar(Math.cos(time) * 0.125 + 1);
 
 				stats.begin();
 				renderer.render(scene, camera);
@@ -393,5 +463,3 @@
 		</script>
 	</body>
 </html>
-
-
