@@ -102,30 +102,12 @@
 
 				// Normal vectors and constants for the cube planes
 				const planeDefinitions = [
-					{
-						normal: new THREE.Vector3(1, 0, 0),
-						constant: planeSize / 2 + xOffset,
-					}, // Left face
-					{
-						normal: new THREE.Vector3(-1, 0, 0),
-						constant: planeSize / 2 - xOffset,
-					}, // Right face
-					{
-						normal: new THREE.Vector3(0, 1, 0),
-						constant: planeSize / 2 + yOffset,
-					}, // Bottom face
-					{
-						normal: new THREE.Vector3(0, -1, 0),
-						constant: planeSize / 2 - yOffset,
-					}, // Top face
-					{
-						normal: new THREE.Vector3(0, 0, 1),
-						constant: planeSize / 2 + zOffset,
-					}, // Back face
-					{
-						normal: new THREE.Vector3(0, 0, -1),
-						constant: planeSize / 2 - zOffset,
-					}, // Front face
+					{normal: new THREE.Vector3(1, 0, 0),constant: planeSize / 2 + xOffset,}, // Left face
+					{normal: new THREE.Vector3(-1, 0, 0),constant: planeSize / 2 - xOffset,}, // Right face
+					{normal: new THREE.Vector3(0, 1, 0),constant: planeSize / 2 + yOffset,}, // Bottom face
+					{normal: new THREE.Vector3(0, -1, 0),constant: planeSize / 2 - yOffset,}, // Top face
+					{normal: new THREE.Vector3(0, 0, 1),constant: planeSize / 2 + zOffset,}, // Back face
+					{normal: new THREE.Vector3(0, 0, -1),constant: planeSize / 2 - zOffset,}, // Front face
 				];
 
 				// Create planes and add helpers to the scene
@@ -264,99 +246,48 @@
 					},
 					folderLocal = gui.addFolder("Local Clipping"),
 					propsLocal = {
-						get Enabled() {
-							return renderer.localClippingEnabled;
-						},
-						set Enabled(v) {
-							renderer.localClippingEnabled = v;
-						},
-						get Shadows() {
-							return material.clipShadows;
-						},
-						set Shadows(v) {
-							material.clipShadows = v;
-						},
+						get Enabled() {return renderer.localClippingEnabled;},
+						set Enabled(v) {renderer.localClippingEnabled = v;},
+
+						get Shadows() {return material.clipShadows;},
+						set Shadows(v) {material.clipShadows = v;},
 
 						// Cube Planes setter and getter
-						get Plane1() {
-							return planes[0].constant;
-						},
-						set Plane1(v) {
-							planes[0].constant = v;
-						},
+						get Plane1() {return planes[0].constant;},
+						set Plane1(v) {planes[0].constant = v;},
 
-						get Plane2() {
-							return planes[1].constant;
-						},
-						set Plane2(v) {
-							planes[1].constant = v;
-						},
+						get Plane2() {return planes[1].constant;},
+						set Plane2(v) {planes[1].constant = v;},
 
-						get Plane3() {
-							return planes[2].constant;
-						},
-						set Plane3(v) {
-							planes[2].constant = v;
-						},
+						get Plane3() {return planes[2].constant;},
+						set Plane3(v) {planes[2].constant = v;},
 
-						get Plane4() {
-							return planes[3].constant;
-						},
-						set Plane4(v) {
-							planes[3].constant = v;
-						},
+						get Plane4() {return planes[3].constant;},
+						set Plane4(v) {planes[3].constant = v;},
 
-						get Plane5() {
-							return planes[4].constant;
-						},
-						set Plane5(v) {
-							planes[4].constant = v;
-						},
+						get Plane5() {return planes[4].constant;},
+						set Plane5(v) {planes[4].constant = v;},
 
-						get Plane6() {
-							return planes[5].constant;
-						},
-						set Plane6(v) {
-							planes[5].constant = v;
-						},
+						get Plane6() {return planes[5].constant;},
+						set Plane6(v) {planes[5].constant = v;},
 
 						// TorusKnot Object Position
-						get GeoX() {
-							return object.position.x;
-						},
-						set GeoX(v) {
-							object.position.x = v;
-						},
+						get GeoX() {return object.position.x;},
+						set GeoX(v) {object.position.x = v;},
 
-						get GeoY() {
-							return object.position.y;
-						},
-						set GeoY(v) {
-							object.position.y = v;
-						},
+						get GeoY() {return object.position.y;},
+						set GeoY(v) {object.position.y = v;},
 
-						get GeoZ() {
-							return object.position.z;
-						},
-						set GeoZ(v) {
-							object.position.z = v;
-						},
+						get GeoZ() {return object.position.z;},
+						set GeoZ(v) {object.position.z = v;},
 					},
 					folderGlobal = gui.addFolder("Global Clipping"),
 					propsGlobal = {
-						get Enabled() {
-							return renderer.clippingPlanes !== Empty;
-						},
-						set Enabled(v) {
-							renderer.clippingPlanes = v ? globalPlanes : Empty;
-						},
+						get Enabled() {return renderer.clippingPlanes !== Empty;},
+						set Enabled(v) {renderer.clippingPlanes = v ? globalPlanes : Empty;},
 
-						get Plane() {
-							return globalPlane.constant;
-						},
-						set Plane(v) {
-							globalPlane.constant = v;
-						},
+						get Plane() {return globalPlane.constant;},
+						set Plane(v) {globalPlane.constant = v;},
 					},
 					showHelpersFolder = gui
 						.add(props, "showHelpers")
@@ -428,14 +359,6 @@
 						planes[3].distanceToPoint(interObj.point) > 0 &&
 						planes[4].distanceToPoint(interObj.point) > 0 &&
 						planes[5].distanceToPoint(interObj.point) > 0;
-					// console.log("isClickedInsideClippedVolume: ",
-					//                 planes[0].distanceToPoint(interObj.point),
-					//                 planes[1].distanceToPoint(interObj.point),
-					//                 planes[2].distanceToPoint(interObj.point),
-					//                 planes[3].distanceToPoint(interObj.point),
-					//                 planes[4].distanceToPoint(interObj.point),
-					//                 planes[5].distanceToPoint(interObj.point),
-					//             );
 
 					if (isClickedInsideClippedVolume) {
 						alert("****************** TorusKnot Clicked! ******************");
